@@ -8,10 +8,13 @@ from assets import *
 
 pg.init()
 
-pg.display.set_mode((600,600),pg.OPENGL|pg.DOUBLEBUF)
+# Define a resolução da janela, nesse caso eu deixei por (800x800) ~ Battist
+pg.display.set_mode((800,800),pg.OPENGL|pg.DOUBLEBUF)
 clock = pg.time.Clock()
 
-glClearColor(0,0.0,0.0,1)
+# Define a cor do background ~ Battist
+# tem o formato glClearColor(red,green,blue,alpha). RBG padrão e o alfa é para transparencia.
+glClearColor(0.0,0.0,0.0,1)
 
 with open("shaders/vertex.txt",'r') as f:
     vertex_src = f.readlines()
@@ -19,6 +22,8 @@ with open("shaders/fragment.txt",'r') as f:
     fragment_src = f.readlines()
 shader = compileProgram(compileShader(vertex_src,GL_VERTEX_SHADER),
                         compileShader(fragment_src,GL_FRAGMENT_SHADER))
+
+
 glUseProgram(shader)
 
 #get a handle to the rotation matrix from the shader
@@ -36,10 +41,12 @@ glEnable(GL_CULL_FACE)
 BOARD_MODEL = ObjModel("models/board.obj")
 WALL_MODEL = ObjModel("models/wall.obj")
 BALL_MODEL = ObjModel("models/ball.obj")
+HOLE_MODEL = ObjModel("models/wall.obj")
 ########################TEXTURES####################################
-BOARD = Texture("textures/board.jpg")
-WALL = Texture("textures/wall.jpg")
+BOARD = Texture("textures/grass2.jpg")
+WALL = Texture("textures/brick2.jpg")
 BALL = Texture("textures/glass.png")
+HOLE = Texture("textures/bola.jpg")
 ####################################################################
 
 #(field of view, aspect ratio,near,far)

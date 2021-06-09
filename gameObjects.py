@@ -12,8 +12,10 @@ class GameBoard:
                 if layout[row][col] != 0:
                     if layout[row][col] == 2:
                         self.ball = Ball((32*col) - 160 + 8,(32*row) - 160 + 8,self)
-                    else:
+                    elif layout[row][col] == 1:
                         self.walls[row][col] = Wall((32*col) - 160,(32*row) - 160,self)
+                    else:
+                        self.walls[row][col] = Hole((32*col) - 160,(32*row) - 160,self)
 
 
         self.rot_x = 0
@@ -27,13 +29,28 @@ class GameBoard:
                         8:(0,-1),9:(1,-1),10:(-1,-1),11:(0,-1),13:(1,0),14:(-1,0)}
     
     def collideWall(self,x,y):
+        wall_class = self.walls[0][0].__class__
         xGrid = math.floor(x/32 + 5)
         yGrid = math.floor(y/32 + 5)
         biggest = max(xGrid,yGrid)
         smallest = min(xGrid,yGrid)
         if biggest > 9 or smallest < 0:
             return True
-        if self.walls[yGrid][xGrid] != None:
+        if isinstance(self.walls[yGrid][xGrid], wall_class):
+            return True
+        return False
+
+    def collideHole(self,x,y):
+        wall_class = self.walls[0][0].__class__
+        xGrid = math.floor(x/32 + 5)
+        yGrid = math.floor(y/32 + 5)
+        biggest = max(xGrid,yGrid)
+        smallest = min(xGrid,yGrid)
+        if biggest > 9 or smallest < 0:
+            return False
+        if isinstance(self.walls[yGrid][xGrid], wall_class):
+            return False
+        elif self.walls[yGrid][xGrid] != None:
             return True
         return False
     
@@ -96,6 +113,25 @@ class Wall:
         glBindTexture(GL_TEXTURE_2D,WALL.getTexture())
         glDrawArrays(GL_TRIANGLES,0,WALL_MODEL.getVertexCount())
 
+
+class Hole:
+    def __init__(self, x, y, parent):
+        self.parent = parent
+        self.x = x
+        self.y = y
+        self.z = 0
+
+    def update(self):
+        # first translate to position on board, then rotate with the board
+        translation = pyrr.matrix44.create_from_translation(pyrr.Vector3([self.x, self.y, self.z]))
+        self.model = pyrr.matrix44.multiply(translation, self.parent.rotationMatrix)
+
+    def draw(self):
+        glUniformMatrix4fv(MODEL_LOC, 1, GL_FALSE, self.model)
+        glBindVertexArray(HOLE_MODEL.getVAO())
+        glBindTexture(GL_TEXTURE_2D, HOLE.getTexture())
+        glDrawArrays(GL_TRIANGLES, 0, HOLE_MODEL.getVertexCount())
+
 class Ball:
     def __init__(self,x,y,parent):
         self.parent = parent
@@ -116,9 +152,14 @@ class Ball:
         #check x direction
         if self.parent.collideWall(testX,self.y):
             self.velocity[0] *= -0.25
+        if self.parent.collideHole(testX,self.y):
+            print('True')
         #check y direction
         if self.parent.collideWall(self.x,testY):
             self.velocity[1] *= -0.25
+        if self.parent.collideHole(self.x,testY):
+            print('True')
+
         self.x += self.velocity[0]
         self.y += self.velocity[1]
     
