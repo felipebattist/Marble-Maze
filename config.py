@@ -16,6 +16,7 @@ clock = pg.time.Clock()
 # tem o formato glClearColor(red,green,blue,alpha). RBG padrão e o alfa é para transparencia.
 glClearColor(0.0,0.0,0.0,1)
 
+
 with open("shaders/vertex.txt",'r') as f:
     vertex_src = f.readlines()
 with open("shaders/fragment.txt",'r') as f:
